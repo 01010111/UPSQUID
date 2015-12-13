@@ -10,14 +10,18 @@ import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.system.debug.FlxDebugger.FlxButtonAlignment;
+import flixel.system.scaleModes.BaseScaleMode;
+import flixel.text.FlxText.FlxTextAlign;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.ui.FlxBar;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import openfl.display.BlendMode;
+import zerolib.util.ZBitmapText;
 import zerolib.util.ZMath;
 import flixel.FlxSubState;
 
@@ -36,9 +40,10 @@ class SlengTeng extends ZState
 	var stages:Array<FlxTilemap>;
 	var stage_amt:Int = 3;
 	var dolly:FlxObject;
-	var squid:SlengSquid;
 	var blocks:FlxGroup;
 	var enemies:FlxTypedGroup<Enemy>;
+	var depth:Int;
+	public var squid:SlengSquid;
 	public var bubbles:Bubbles;
 	public var blood:Blood;
 	public var fx_bg_far:FlxGroup;
@@ -51,6 +56,7 @@ class SlengTeng extends ZState
 	{
 		i = this;
 		colors = [0xff000000, 0xffff0000, 0xffffffff];
+		FlxG.scaleMode.gameSize.set(288, 512);
 		
 		level = new FlxGroup();
 		blocks = new FlxGroup();
@@ -126,8 +132,15 @@ class SlengTeng extends ZState
 	function collisions():Void
 	{
 		FlxG.collide(squid, level);
-		FlxG.collide(squid, blocks);
+		squid.over_boost ? FlxG.overlap(squid, blocks, break_block) : FlxG.collide(squid, blocks);
 		FlxG.overlap(squid, enemies, chomp);
+	}
+	
+	function break_block(s:SlengSquid, b:Block):Void
+	{
+		fx_fg.add(new Explosion(b.getMidpoint()));
+		for (i in 0...12) bubbles.fire(b.getMidpoint(), ZMath.velocityFromAngle(ZMath.randomRange(0, 360), ZMath.randomRange(20, 40)));
+		b.kill();
 	}
 	
 	function chomp(s:SlengSquid, e:Enemy):Void
@@ -136,6 +149,7 @@ class SlengTeng extends ZState
 		fx_fg.add(new Explosion(e.getMidpoint()));
 		e.destroy();
 		ui.give(4);
+		ui.combo_plus();
 	}
 	
 	function swap_tilemaps():Void
@@ -152,6 +166,8 @@ class SlengTeng extends ZState
 		t.loadMapFromCSV(o.getString(), "assets/images/tiles.png", 16, 16, FlxTilemapAutoTiling.AUTO);
 		_loaded_object_y_offset = t.y;
 		o.loadEntities(load_objects, "objects");
+		depth++;
+		if (depth % 5 == 0) fx_bg.add(new DepthIndicator(depth, t.y + 8));
 	}
 	
 	var _loaded_object_y_offset:Float;
@@ -175,14 +191,19 @@ class SlengTeng extends ZState
 class SlengSquid extends FlxSprite
 {
 	
+	public var over_boost:Bool = false;
+	
 	public function new()
 	{
 		super();
 		loadGraphic("assets/images/sleng_teng.png", true, 32, 32);
-		animation.add("idle",   [4, 5, 6, 7, 6, 5], 16);
+		animation.add("idle",   [12]);
 		animation.add("thrust", [0, 1, 2, 3, 2, 1], 24);
+		animation.add("in", [10, 11, 12], 20, false);
+		animation.add("out", [12, 13, 10], 20, false);
 		animation.add("hurt", [8, 9, 8, 9, 8], 15, false);
-		animation.play("idle");
+		animation.add("play", [10, 11, 12, 13]);
+		animation.play("play");
 		
 		setSize(16, 16);
 		offset.set(8, 8);
@@ -201,31 +222,46 @@ class SlengSquid extends FlxSprite
 	override public function update(elapsed:Float):Void 
 	{
 		check_collisions();
-		if (animation.finished) animation.play("idle");
-		if (animation.curAnim.name != "hurt") controls();
+		controls();
 		super.update(elapsed);
 	}
 	
+	var bubble_timer:Int;
+	
 	function controls():Void
 	{
-		var thrusty = true;
-		if (FlxG.keys.pressed.LEFT) angle -= 3;
-		if (FlxG.keys.pressed.RIGHT) angle += 3;
-		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT || velocity.y > 0) thrusty = false;
-		if (FlxG.keys.anyJustReleased([FlxKey.LEFT, FlxKey.RIGHT])) thrust();
-		thrusty ? animation.play("thrust") : animation.play("idle");
-		
-		angle = ZMath.clamp(angle, -170, -10);
+		if (over_boost)
+		{
+			if (FlxG.keys.pressed.LEFT) angle -= 2;
+			if (FlxG.keys.pressed.RIGHT) angle += 2;
+			//animation.play("out");
+			var v = ZMath.velocityFromAngle(angle, 400);
+			velocity.set(v.x, v.y);
+			if (justTouched(FlxObject.CEILING)) over_boost = false;
+			if (bubble_timer == 0)
+			{
+				SlengTeng.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + 180, ZMath.randomRange(10, 30)));
+				bubble_timer = ZMath.randomRangeInt(3, 6);
+			}
+			else bubble_timer--;
+		}
+		else 
+		{
+			var thrusty = true;
+			if (FlxG.keys.pressed.LEFT) angle -= 3;
+			if (FlxG.keys.pressed.RIGHT) angle += 3;
+			if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT || velocity.y > 0) thrusty = false;
+			if (FlxG.keys.anyJustReleased([FlxKey.LEFT, FlxKey.RIGHT])) thrust();
+			if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.RIGHT && SlengTeng.i.ui.bar_flash) over_boost = true;
+			angle = ZMath.clamp(angle, -170, -10);
+		}
+		animation.curAnim.frameRate = Math.floor(ZMath.map(velocity.y, 100, -300, 0, 40));
 	}
 	
 	function check_collisions():Void
 	{
 		if (velocity.y > 100) velocity.y = 100;
 		
-		if (justTouched(FlxObject.CEILING))
-		{
-			ouch();
-		}
 		
 		if (justTouched(FlxObject.FLOOR))
 		{
@@ -495,6 +531,11 @@ class UI extends FlxGroup
 	var ready:Bool = true;
 	var to_give:Int = 0;
 	var to_take:Int = 0;
+	var combo_bar:FlxBar;
+	var combo_text:ZBitmapText;
+	var combo:Int;
+	var combo_amt:Float = 0;
+	public var bar_flash:Bool;
 	
 	public function new()
 	{
@@ -513,6 +554,15 @@ class UI extends FlxGroup
 			add(p);
 		}
 		give(16);
+		
+		combo_bar = new FlxBar(48, 20, FlxBarFillDirection.LEFT_TO_RIGHT, FlxG.width - 96, 6, this, "combo_amt", 0, 100);
+		combo_bar.createFilledBar(0x80000000, 0xffffffff, false);
+		combo_bar.scrollFactor.set();
+		add(combo_bar);
+		
+		combo_text = new ZBitmapText(44, 16, " 0123456789m", FlxPoint.get(7, 7), "assets/images/depth_font.png", FlxTextAlign.LEFT);
+		combo_text.scrollFactor.set();
+		add(combo_text);
 	}
 	
 	public function give(_i:Int):Void
@@ -543,6 +593,9 @@ class UI extends FlxGroup
 		}
 	}
 	
+	var flash_white:Bool = false;
+	var flash_timer:Int = 3;
+	
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
@@ -552,6 +605,47 @@ class UI extends FlxGroup
 			else pellets[i].whatever = true;
 		}
 		if (health < 0) SlengTeng.i.openSubState(new GameOver());
+		
+		if (combo_amt > 75 || SlengTeng.i.squid.over_boost) bar_flash = true;
+		else bar_flash = false;
+		
+		if (combo_amt > 0) combo_amt -= SlengTeng.i.squid.over_boost ? 0.25 : 0.15;
+		else combo = 0;
+		
+		if (combo > 0) combo_text.text = "m" + combo;
+		else combo_text.text = "";
+		
+		if (bar_flash)
+		{
+			if (flash_timer == 0)
+			{
+				if (flash_white)
+				{
+					flash_white = false;
+					combo_bar.color = 0xffffffff;
+				}
+				else 
+				{
+					flash_white = true;
+					combo_bar.color = 0xff808080;
+				}
+				flash_timer = 3;
+			}
+			else 
+			{
+				flash_timer--;
+			}
+		}
+		else 
+		{
+			combo_bar.color = 0xff808080;
+		}
+	}
+	
+	public function combo_plus():Void
+	{
+		combo++;
+		combo_amt = ZMath.clamp(combo_amt + 20, 0, 100);
 	}
 	
 }
@@ -595,7 +689,32 @@ class Pellet extends FlxSprite
 class DepthIndicator extends FlxGroup
 {
 	
+	var line:FlxSprite;
+	var text:ZBitmapText;
 	
+	public function new(_d:Int, _y:Float):Void
+	{
+		super();
+		
+		line = new FlxSprite(0, _y);
+		line.makeGraphic(FlxG.width, 1, 0xff808080);
+		add(line);
+		
+		text = new ZBitmapText(0, _y - 4, " 0123456789m", FlxPoint.get(7, 7), "assets/images/depth_font.png", FlxTextAlign.CENTER, FlxG.width);
+		text.text = "" + _d + "0m";
+		text.color = 0xff808080;
+		text.scrollFactor.set(1, 1);
+		add(text);
+	}
+	
+	override public function update(elapsed:Float):Void 
+	{
+		if (line.getScreenPosition().y > FlxG.height)
+		{
+			kill();
+		}
+		super.update(elapsed);
+	}
 	
 }
 
