@@ -39,7 +39,7 @@ class ZState extends FlxState
 	{
 		super.draw();
 		//#if !debug
-		if (colors != null && !FlxG.keys.pressed.D) paletteMap();
+		if (colors != null) paletteMap();
 		//#end
 	}
 	
