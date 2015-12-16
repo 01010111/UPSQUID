@@ -2,7 +2,7 @@
 <project>
 	<!------------------------------APPLICATION SETTINGS---------------------------->
 	
-	<app title="LD34" file="LD34" main="Main" version="0.0.1" company="HaxeFlixel" />
+	<app title="UPSQUID" file="UPSQUID" main="Main" version="0.0.1" company="01010111" package="com.zeroone.upsquid" />
 	
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 	<!--or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"!-->
@@ -23,7 +23,7 @@
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" />
 	
 	<!--Mobile-specific-->
-	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" />
+	<window if="mobile" orientation="portrait" fullscreen="true" width="0" height="0" />
 	
 	<!--------------------------------PATHS SETTINGS-------------------------------->
 	
@@ -50,6 +50,20 @@
 		<!--sound path=".mp3" id="Snd_" /-->
 	</assets>
 	<assets path="assets/audio/ogg" unless="flash" embed="true">
+		<sound path="bloop1.ogg" id="Snd_bloop1" />
+		<sound path="bloop2.ogg" id="Snd_bloop2" />
+		<sound path="bloop3.ogg" id="Snd_bloop3" />
+		<sound path="bloop4.ogg" id="Snd_bloop4" />
+		<sound path="bloop5.ogg" id="Snd_bloop5" />
+		<sound path="boost_in.ogg" id="Snd_boost_in" />
+		<sound path="boost_out.ogg" id="Snd_boost_out" />
+		<sound path="chomp.ogg" id="Snd_chomp" />
+		<sound path="drown.ogg" id="Snd_drown" />
+		<sound path="explosion.ogg" id="Snd_explosion" />
+		<sound path="ouch.ogg" id="Snd_ouch" />
+		<sound path="bounce.ogg" id="Snd_bounce" />
+		<sound path="bubble.ogg" id="Snd_bubble" />
+		<sound path="bgm1.ogg" id="Snd_bgm1" />
 		<!--sound path=".ogg" id="Snd_" /-->
 	</assets>
 	

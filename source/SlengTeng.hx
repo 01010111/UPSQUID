@@ -1,6 +1,7 @@
 package;
 import flixel.addons.editors.ogmo.FlxOgmoLoader;
 import flixel.addons.effects.FlxTrail;
+import flixel.effects.postprocess.PostProcess;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxState;
@@ -71,6 +72,8 @@ class SlengTeng extends ZState
 	
 	override public function create():Void 
 	{
+		//FlxG.fullscreen = true;
+		
 		Reg.initSave();
 		i = this;
 		colors = [0xff000000, alt_colors[ZMath.randomRangeInt(0, alt_colors.length - 1)], 0xffffffff];
@@ -79,6 +82,9 @@ class SlengTeng extends ZState
 		add(c);
 		
 		//MUSIC! play intro
+		
+		FlxG.sound.playMusic("Snd_bgm1", 0.5);
+		FlxG.sound.music.pause();
 		
 		level = new FlxGroup();
 		blocks = new FlxGroup();
@@ -95,6 +101,7 @@ class SlengTeng extends ZState
 		{
 			var l:FlxTilemap = new FlxTilemap();
 			l.setPosition(0, -i * FlxG.height);
+			//l.setPosition(FlxG.width * 0.5 - 144, -i * FlxG.height);
 			load_map(l);
 			stages.push(l);
 			level.add(l);
@@ -134,7 +141,10 @@ class SlengTeng extends ZState
 		add(fade);
 		add(ui);
 		
+		FlxG.camera.setSize(288, 512);
+		FlxG.camera.setPosition(FlxG.width * 0.5 - 144, FlxG.height * 0.5 - 256);
 		FlxG.camera.follow(dolly);
+		//FlxG.camera.setScrollBounds(0, 4000, -500000000000000000000000, 140);
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height * 3);
 		FlxG.worldBounds.setPosition(0, stages[stages.length - 1].y);
 		super.create();
@@ -154,9 +164,11 @@ class SlengTeng extends ZState
 		add(instruction_text);
 		FlxTween.tween(instruction_text, { alpha:1 }, 1);
 		
+		var _o = Reg.cam_offs > 32 ? 0.4 : 0.6;
+		
 		if (Reg.hi_combo > 0)
 		{
-			var combo_text:ZBitmapText = new ZBitmapText(0, FlxG.height * 0.6, " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x+", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
+			var combo_text:ZBitmapText = new ZBitmapText(0, FlxG.height * _o, " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x+", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
 			combo_text.text = "HI COMBO : " + Reg.hi_combo;
 			combo_text.alpha = 0;
 			combo_text.scrollFactor.set(1, 1);
@@ -166,7 +178,7 @@ class SlengTeng extends ZState
 		
 		if (Reg.hi_depth > 0)
 		{
-			var depth_text:ZBitmapText = new ZBitmapText(0, FlxG.height * 0.63, " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x+", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
+			var depth_text:ZBitmapText = new ZBitmapText(0, FlxG.height * (_o + 0.025), " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x+", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
 			depth_text.text = "HI POINT : " + Reg.hi_depth;
 			depth_text.alpha = 0;
 			depth_text.scrollFactor.set(1, 1);
@@ -224,7 +236,7 @@ class SlengTeng extends ZState
 			game_over_text.scale.set(2, 2);
 			add(game_over_text);
 			
-			var _d = Std.int( -(dolly.y - FlxG.height) * (10 / FlxG.height));
+			var _d = Std.int( -(dolly.y - FlxG.height + 48) * (10 / FlxG.height));
 			
 			var high_point_text:ZBitmapText = new ZBitmapText(0, FlxG.height * 0.45, " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
 			high_point_text.text = "HIGH POINT:" + _d;
@@ -265,7 +277,7 @@ class SlengTeng extends ZState
 	{
 		if (linked)
 		{
-			if (squid.y < dolly.y) dolly.y += (squid.y - dolly.y) * 0.1;
+			if (squid.y - Reg.cam_offs < dolly.y) dolly.y += (squid.y - Reg.cam_offs - dolly.y) * 0.1;
 		}
 		else
 		{
@@ -326,7 +338,7 @@ class SlengTeng extends ZState
 		{
 			s = "assets/data/" + ZMath.randomRangeInt(0, 11) + ".oel";
 		}
-		var o = new FlxOgmoLoader(s);
+		var o = new Oggo(s);
 		t.loadMapFromCSV(o.getString(), "assets/images/tiles.png", 16, 16, FlxTilemapAutoTiling.AUTO);
 		_loaded_object_y_offset = t.y;
 		o.loadEntities(load_objects, "objects");
@@ -375,6 +387,7 @@ class SlengSquid extends FlxSprite
 		setSize(16, 16);
 		offset.set(8, 8);
 		screenCenter();
+		y += Reg.cam_offs;
 		
 		angle = -90;
 		drag.x = 100;
@@ -439,7 +452,8 @@ class SlengSquid extends FlxSprite
 				begun = true;
 				acceleration.y = 200;
 				//MUSIC! stop intro, play main
-				FlxG.sound.playMusic("Snd_bgm1", 0.5);
+				//FlxG.sound.playMusic("Snd_bgm1", 0.5);
+				FlxG.sound.music.play();
 			}
 		}
 		ghost.visible = over_boost;
@@ -495,13 +509,16 @@ class SlengSquid extends FlxSprite
 	
 	function thrust():Void
 	{
-		Sounds.play("bloop" + ZMath.randomRangeInt(1, 5), ZMath.randomRange(0.075, 0.125));
-		var v = ZMath.velocityFromAngle(angle, 300);
-		velocity.set(v.x, v.y);
-		SlengTeng.i.ui.take(1);
-		for (i in 0...3)
+		if (SlengTeng.i.ui.health >= 0)
 		{
-			new FlxTimer().start(i * 0.05).onComplete = function(t:FlxTimer):Void { SlengTeng.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + ZMath.randomRange(120, 240), ZMath.randomRange(20, 50))); }
+			Sounds.play("bloop" + ZMath.randomRangeInt(1, 5), ZMath.randomRange(0.1, 0.2));
+			var v = ZMath.velocityFromAngle(angle, 300);
+			velocity.set(v.x, v.y);
+			SlengTeng.i.ui.take(1);
+			for (i in 0...3)
+			{
+				new FlxTimer().start(i * 0.05).onComplete = function(t:FlxTimer):Void { SlengTeng.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + ZMath.randomRange(120, 240), ZMath.randomRange(20, 50))); }
+			}
 		}
 	}
 	
@@ -799,7 +816,7 @@ class Explosion extends FlxSprite
 
 class UI extends FlxGroup
 {
-	var health:Int = 0;
+	public var health:Int = 0;
 	var pellets:Array<Pellet>;
 	var ready:Bool = true;
 	var to_give:Int = 0;
@@ -877,7 +894,7 @@ class UI extends FlxGroup
 			if (i > health) pellets[i].whatever = false;
 			else pellets[i].whatever = true;
 		}
-		if (health < 0 && SlengTeng.i.linked) 
+		if (health < 0 && SlengTeng.i.linked && SlengTeng.i.squid.velocity.y >= 100) 
 		{
 			SlengTeng.i.game_over();
 		}
@@ -1013,6 +1030,8 @@ class Reg
 	
 	public static var hi_combo:Int = 0;
 	public static var hi_depth:Int = 0;
+	public static var cam_offs:Int = 48;
+	
 	public static var loaded:Bool = false;
 	public static var _save:FlxSave;
 	
@@ -1024,6 +1043,9 @@ class Reg
 			_save.bind("SQUID_DATA");
 			if (_save.data.hi_combo != null) load();
 			loaded = true;
+			#if !flash
+			FlxG.addPostProcess(new PostProcess("assets/data/paletteMapSimple.frag"));
+			#end
 		}
 	}
 	
@@ -1031,12 +1053,15 @@ class Reg
 	{
 		hi_combo = _save.data.hi_combo;
 		hi_depth = _save.data.hi_depth;
+		//cam_offs = _save.data.cam_offs;
 	}
 	
 	public static function save():Void
 	{
 		_save.data.hi_combo = hi_combo;
 		_save.data.hi_depth = hi_depth;
+		//_save.data.cam_offs = cam_offs;
+		_save.flush();
 	}
 	
 }
@@ -1049,21 +1074,28 @@ class Controls extends FlxObject
 	public var _l_released:Bool;
 	public var _r_released:Bool;
 	
+#if mobile
+	var _l_pad:FlxObject;
+	var _r_pad:FlxObject;
+#else
 	var joypad:FlxGamepad;
+#end
 	
 	public function new()
 	{
 		super();
-		
+#if !mobile
 		joypad = FlxG.gamepads.firstActive;
+#end
 	}
 	
-	var padchk:Int = 10;
+	var padchk:Int = 60;
 	
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
 		
+#if !mobile
 		_l = FlxG.keys.anyPressed([FlxKey.LEFT, FlxKey.X, FlxKey.A]) || joypad != null && joypad.pressed.LEFT_SHOULDER;
 		_r = FlxG.keys.anyPressed([FlxKey.RIGHT, FlxKey.C, FlxKey.D]) || joypad != null && joypad.pressed.RIGHT_SHOULDER;
 		_l_released = FlxG.keys.anyJustReleased([FlxKey.LEFT, FlxKey.X, FlxKey.A]) || joypad != null && joypad.justReleased.LEFT_SHOULDER;
@@ -1074,8 +1106,32 @@ class Controls extends FlxObject
 			if (joypad == null) joypad = FlxG.gamepads.firstActive;
 			padchk = 120;
 		}
-		
 		else padchk--;
+#else
+		_l = _r = _l_released = _r_released = false;
+		for (touch in FlxG.touches.list)
+		{
+			if (touch.pressed)
+			{
+				if (touch.screenY > FlxG.height * 0.5)
+				{
+					if (touch.screenX < FlxG.width * 0.6) _l = true;
+					if (touch.screenX > FlxG.width * 0.4) _r = true;
+				}
+			}
+			
+			if (touch.justReleased)
+			{
+				if (touch.screenY > FlxG.height * 0.5)
+				{
+					if (touch.screenX < FlxG.width * 0.6) _l_released = true;
+					if (touch.screenX > FlxG.width * 0.4) _r_released = true;
+				}
+			}
+		}
+#end
 	}
 	
 }
+
+class Oggo extends FlxOgmoLoader { public function getString(TileLayer:String = "tiles"):String { return _fastXml.node.resolve(TileLayer).innerData; } }
