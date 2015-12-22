@@ -1,4 +1,4 @@
-package ;
+package util;
 import flixel.FlxState;
 import flixel.tweens.FlxTween;
 import openfl.system.System;
@@ -10,7 +10,7 @@ import openfl.geom.Point;
 /**
  * Adds a few things - use a color palette with this.colors and this.b (brightness), set this.esc_exits to true and you can exit with the escape button.
  * Thanks to _rxi for help with 4 color palette stuff!
- * @author x01010111
+ * @author 01010111
  */
 class ZState extends FlxState
 {

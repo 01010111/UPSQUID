@@ -46,6 +46,7 @@
 		<sound path="ouch.mp3" id="Snd_ouch" />
 		<sound path="bounce.mp3" id="Snd_bounce" />
 		<sound path="bubble.mp3" id="Snd_bubble" />
+		<sound path="combo_available.mp3" id="Snd_combo_available" />
 		<sound path="bgm1.mp3" id="Snd_bgm1" />
 		<!--sound path=".mp3" id="Snd_" /-->
 	</assets>
@@ -63,6 +64,7 @@
 		<sound path="ouch.ogg" id="Snd_ouch" />
 		<sound path="bounce.ogg" id="Snd_bounce" />
 		<sound path="bubble.ogg" id="Snd_bubble" />
+		<sound path="combo_available.ogg" id="Snd_combo_available" />
 		<sound path="bgm1.ogg" id="Snd_bgm1" />
 		<!--sound path=".ogg" id="Snd_" /-->
 	</assets>
@@ -117,4 +119,12 @@
 	<!--------------------------------CUSTOM---------------------------------------->
 	
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
+	<icon path="assets/images/icon.svg"/>
+	<icon path="assets/images/icon_16.png"  size="16" />
+	<icon path="assets/images/icon_32.png"  size="32" />
+	<icon path="assets/images/icon_64.png"  size="64" />
+	<icon path="assets/images/icon_128.png" size="128" />
+	<icon path="assets/images/icon_256.png" size="256" />
+	<icon path="assets/images/icon_512.png" size="512" />
+	
 </project>
