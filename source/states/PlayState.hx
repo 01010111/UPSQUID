@@ -71,7 +71,9 @@ class PlayState extends ZState
 	
 	override public function create():Void 
 	{
-		//FlxG.fullscreen = true;
+		#if !flash
+		FlxG.fullscreen = true;
+		#end
 		
 		Reg.initSave();
 		i = this;
@@ -205,7 +207,7 @@ class PlayState extends ZState
 		_t.text = _text;
 		_t.alpha = 0;
 		_t.scale.set(_scale, _scale);
-		_t.scrollFactor.set(_scroll_factor);
+		_t.scrollFactor.set(_scroll_factor, _scroll_factor);
 		add(_t);
 		FlxTween.tween(_t, { alpha:1 }, _tween_time);
 	}
