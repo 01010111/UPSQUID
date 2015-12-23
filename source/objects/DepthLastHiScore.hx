@@ -14,6 +14,7 @@ import zerolib.util.ZMath;
 import flixel.util.FlxSpriteUtil;
 import flixel.tweens.FlxEase;
 import util.Reg;
+import states.PlayState;
 
 /**
  * ...
@@ -64,12 +65,12 @@ class DepthLastHiScore extends FlxGroup
 	
 	override public function update(elapsed:Float):Void 
 	{
-		if (line.y > SlengTeng.i.squid.y)
+		if (line.y > PlayState.i.squid.y)
 		{
 			fireLine();
-			SlengTeng.i.confetti.fire(SlengTeng.i.squid.getMidpoint());
-			SlengTeng.i.ui.combo_amt = ZMath.clamp(SlengTeng.i.ui.combo_amt + 20, 0, 100);
-			SlengTeng.i.explosions.fire(SlengTeng.i.squid.getMidpoint());
+			PlayState.i.confetti.fire(PlayState.i.squid.getMidpoint());
+			PlayState.i.ui.combo_amt = ZMath.clamp(PlayState.i.ui.combo_amt + 20, 0, 100);
+			PlayState.i.explosions.fire(PlayState.i.squid.getMidpoint());
 			//FlxTween.tween(line, { alpha:0 }, 0.5);
 			//FlxTween.tween(text, { alpha:0 }, 0.5).onComplete = function(t:FlxTween):Void { kill(); }
 			kill();
@@ -95,7 +96,7 @@ class LineBreaker extends FlxSprite
 		super();
 		makeGraphic(8, 1);
 		exists = false;
-		SlengTeng.i.fx_bg.add(this);
+		PlayState.i.fx_bg.add(this);
 	}
 	
 	public function fire(_p:FlxPoint):Void
@@ -106,8 +107,8 @@ class LineBreaker extends FlxSprite
 		new FlxTimer().start(0.5).onComplete = function (t:FlxTimer) : Void { FlxSpriteUtil.flicker(this, 0.5); }
 		FlxTween.tween(this, { angle:ZMath.randomRange( -180, 180) }, 1, { ease:FlxEase.quintOut } ).onComplete = function(t:FlxTween):Void { kill(); }
 		acceleration.y = 40;
-		var _a = ZMath.clamp(270 + (x - SlengTeng.i.squid.x), 180, 360);
-		var _s = ZMath.clamp(150 - ZMath.distance(getMidpoint(), SlengTeng.i.squid.getMidpoint()), 0, ZMath.clamp(-SlengTeng.i.squid.velocity.y - 20, 0, 900) + ZMath.randomRange( -10, 20));
+		var _a = ZMath.clamp(270 + (x - PlayState.i.squid.x), 180, 360);
+		var _s = ZMath.clamp(150 - ZMath.distance(getMidpoint(), PlayState.i.squid.getMidpoint()), 0, ZMath.clamp(-PlayState.i.squid.velocity.y - 20, 0, 900) + ZMath.randomRange( -10, 20));
 		var _v = ZMath.velocityFromAngle(_a, _s);
 		velocity.set(_v.x, _v.y);
 	}

@@ -7,6 +7,7 @@ import flixel.util.FlxTimer;
 import flixel.math.FlxPoint;
 import flixel.util.FlxSpriteUtil;
 import flixel.tweens.FlxTween;
+import states.PlayState;
 
 /**
  * ...
@@ -61,7 +62,7 @@ class BloodSpot extends FlxSprite
 			FlxSpriteUtil.drawCircle(this, -1, -1, -1, 0xff808080);
 			offset.set(s * 0.5, s * 0.5);
 			acceleration.y = -60;
-			SlengTeng.i.fx_fg.add(this);
+			PlayState.i.fx_fg.add(this);
 		}
 		else 
 		{
@@ -70,7 +71,7 @@ class BloodSpot extends FlxSprite
 			FlxSpriteUtil.drawCircle(this, -1, -1, -1, 0xff808080);
 			offset.set(s * 0.5, s * 0.5);
 			acceleration.y = -50;
-			SlengTeng.i.fx_bg_far.add(this);
+			PlayState.i.fx_bg_far.add(this);
 		}
 	}
 	

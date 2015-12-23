@@ -5,6 +5,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import util.Sounds;
 import zerolib.util.ZMath;
+import states.PlayState;
 
 /**
  * ...
@@ -48,7 +49,7 @@ class Explosion extends FlxSprite
 		angle = 90 * ZMath.randomRangeInt(0, 3);
 		for (i in 0...6)
 		{
-			SlengTeng.i.bubbles.fire(_p, ZMath.velocityFromAngle(ZMath.randomRange(0, 360), ZMath.randomRange(40, 80)));
+			PlayState.i.bubbles.fire(_p, ZMath.velocityFromAngle(ZMath.randomRange(0, 360), ZMath.randomRange(40, 80)));
 		}
 		var s = ZMath.randomRange(1, 1.5);
 		scale.set(s, s);

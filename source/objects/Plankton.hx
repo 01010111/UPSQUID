@@ -5,6 +5,7 @@ import zerolib.util.ZMath;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import util.Sounds;
+import states.PlayState;
 
 /**
  * ...
@@ -40,7 +41,7 @@ class Plankton extends Enemy
 	{
 		if (bubble_timer == 0)
 		{
-			SlengTeng.i.bubbles.fire(getMidpoint(), FlxPoint.get());
+			PlayState.i.bubbles.fire(getMidpoint(), FlxPoint.get());
 			bubble_timer = ZMath.randomRangeInt(60, 90);
 			if (isOnScreen() && Math.random() > 0.5) Sounds.play("bubble", ZMath.randomRange(0.02, 0.04));
 		}

@@ -17,10 +17,14 @@ class ZState extends FlxState
 	var colors:Array<Int>;
 	var esc_exits:Bool = false;
 	
-	public function new() 
+	public var c:Controls;
+	
+	override public function create():Void 
 	{
 		FlxG.mouse.visible = false;
-		super();
+		c = new Controls();
+		add(c);
+		super.create();
 	}
 	
 	override public function update(elapsed:Float):Void 
@@ -38,9 +42,9 @@ class ZState extends FlxState
 	override public function draw():Void
 	{
 		super.draw();
-		//#if !debug
+		#if !debug
 		if (colors != null) paletteMap();
-		//#end
+		#end
 	}
 	
 	var colorPalette:Array<Array<Int>>;

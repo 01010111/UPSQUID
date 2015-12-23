@@ -9,6 +9,7 @@ import flixel.util.FlxTimer;
 import zerolib.util.ZMath;
 import flixel.FlxSprite;
 import flixel.FlxG;
+import states.PlayState;
 
 /**
  * ...
@@ -95,20 +96,20 @@ class UI extends FlxGroup
 			if (i > health) pellets[i].whatever = false;
 			else pellets[i].whatever = true;
 		}
-		if (health < 0 && SlengTeng.i.linked && SlengTeng.i.squid.velocity.y >= 100) 
+		if (health < 0 && PlayState.i.linked && PlayState.i.squid.velocity.y >= 100) 
 		{
-			SlengTeng.i.game_over();
+			PlayState.i.game_over();
 		}
-		//if (health < 0) SlengTeng.i.openSubState(new GameOver());
+		//if (health < 0) PlayState.i.openSubState(new GameOver());
 		
-		if (combo_amt > 75 || SlengTeng.i.squid.over_boost) bar_flash = true;
+		if (combo_amt > 75 || PlayState.i.squid.over_boost) bar_flash = true;
 		else bar_flash = false;
 		
 		if (bar_flash && !last_flash) Sounds.play("combo_available", 0.25);
 		
 		last_flash = bar_flash;
 		
-		if (combo_amt > 0) combo_amt -= SlengTeng.i.squid.over_boost ? 0.25 : 0.15;
+		if (combo_amt > 0) combo_amt -= PlayState.i.squid.over_boost ? 0.25 : 0.15;
 		else combo = 0;
 		
 		if (combo > 0) combo_text.text = "x" + combo;
@@ -144,7 +145,7 @@ class UI extends FlxGroup
 	public function combo_plus():Void
 	{
 		combo++;
-		if (combo > SlengTeng.i.top_combo) SlengTeng.i.top_combo = combo;
+		if (combo > PlayState.i.top_combo) PlayState.i.top_combo = combo;
 		combo_amt = ZMath.clamp(combo_amt + 25, 0, 100);
 	}
 	

@@ -5,6 +5,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.FlxObject;
+import states.PlayState;
 
 /**
  * ...
@@ -32,7 +33,7 @@ class Controls extends FlxObject
 #else
 		_debug_text = new FlxText(10, 20);
 		_debug_text.color = 0xffffff;
-		SlengTeng.i.fx_fg.add(_debug_text);
+		PlayState.i.fx_fg.add(_debug_text);
 #end
 	}
 	

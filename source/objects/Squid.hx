@@ -8,6 +8,7 @@ import flixel.math.FlxMath;
 import flixel.FlxSprite;
 import flixel.util.FlxTimer;
 import util.*;
+import states.PlayState;
 
 /**
  * ...
@@ -44,7 +45,7 @@ class Squid extends FlxSprite
 		elasticity = 0.3;
 		
 		ghost = new FlxTrail(this);
-		SlengTeng.i.fx_bg_far.add(ghost);
+		PlayState.i.fx_bg_far.add(ghost);
 		
 		FlxG.watch.add(animation.curAnim, "frameRate", "R: ");
 	}
@@ -69,15 +70,15 @@ class Squid extends FlxSprite
 		{
 			if (over_boost)
 			{
-				if (SlengTeng.i.c._l) angle -= 2;
-				if (SlengTeng.i.c._r) angle += 2;
+				if (PlayState.i.c._l) angle -= 2;
+				if (PlayState.i.c._r) angle += 2;
 				var v = ZMath.velocityFromAngle(angle, 400);
 				velocity.set(v.x, v.y);
 				if (justTouched(FlxObject.CEILING)) stop_over_boost();
-				if (SlengTeng.i.ui.combo_amt <= 0) stop_over_boost();
+				if (PlayState.i.ui.combo_amt <= 0) stop_over_boost();
 				if (bubble_timer == 0)
 				{
-					SlengTeng.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + 180, ZMath.randomRange(10, 30)));
+					PlayState.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + 180, ZMath.randomRange(10, 30)));
 					bubble_timer = ZMath.randomRangeInt(3, 6);
 				}
 				else bubble_timer--;
@@ -85,18 +86,18 @@ class Squid extends FlxSprite
 			else 
 			{
 				var thrusty = true;
-				if (SlengTeng.i.c._l) angle -= 3;
-				if (SlengTeng.i.c._r) angle += 3;
-				if (SlengTeng.i.c._l || SlengTeng.i.c._r || velocity.y > 0) thrusty = false;
-				if (SlengTeng.i.c._l_released || SlengTeng.i.c._r_released) thrust();
-				if (SlengTeng.i.c._l && SlengTeng.i.c._r && SlengTeng.i.ui.bar_flash) go_over_boost();
+				if (PlayState.i.c._l) angle -= 3;
+				if (PlayState.i.c._r) angle += 3;
+				if (PlayState.i.c._l || PlayState.i.c._r || velocity.y > 0) thrusty = false;
+				if (PlayState.i.c._l_released || PlayState.i.c._r_released) thrust();
+				if (PlayState.i.c._l && PlayState.i.c._r && PlayState.i.ui.bar_flash) go_over_boost();
 				angle = ZMath.clamp(angle, -170, -10);
 			}
 			animation.curAnim.frameRate = Std.int(FlxMath.remapToRange(velocity.y, 100, -300, 1, 4));
 		}
 		else
 		{
-			if (SlengTeng.i.c._l && SlengTeng.i.c._r)
+			if (PlayState.i.c._l && PlayState.i.c._r)
 			{
 				begun = true;
 				acceleration.y = 200;
@@ -124,9 +125,9 @@ class Squid extends FlxSprite
 	
 	function over_boost_fx():Void
 	{
-		SlengTeng.i.confetti.fire(getMidpoint());
+		PlayState.i.confetti.fire(getMidpoint());
 		FlxG.camera.shake(0.01, 0.1);
-		//SlengTeng.i.fx_fg.add(new Explosion(getMidpoint()));
+		//PlayState.i.fx_fg.add(new Explosion(getMidpoint()));
 	}
 	
 	function check_collisions():Void
@@ -158,15 +159,15 @@ class Squid extends FlxSprite
 	
 	function thrust():Void
 	{
-		if (SlengTeng.i.ui.health >= 0)
+		if (PlayState.i.ui.health >= 0)
 		{
 			Sounds.play("bloop" + ZMath.randomRangeInt(1, 5), ZMath.randomRange(0.1, 0.2));
 			var v = ZMath.velocityFromAngle(angle, 300);
 			velocity.set(v.x, v.y);
-			SlengTeng.i.ui.take(1);
+			PlayState.i.ui.take(1);
 			for (i in 0...3)
 			{
-				new FlxTimer().start(i * 0.05).onComplete = function(t:FlxTimer):Void { SlengTeng.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + ZMath.randomRange(120, 240), ZMath.randomRange(20, 50))); }
+				new FlxTimer().start(i * 0.05).onComplete = function(t:FlxTimer):Void { PlayState.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + ZMath.randomRange(120, 240), ZMath.randomRange(20, 50))); }
 			}
 		}
 	}
