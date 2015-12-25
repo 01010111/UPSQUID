@@ -51,7 +51,7 @@ class UI extends FlxGroup
 		combo_bar.scrollFactor.set();
 		add(combo_bar);
 		
-		combo_text = new ZBitmapText(44, 16, " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.LEFT);
+		combo_text = new ZBitmapText(44, 16, PlayState.i.large_alphabet, FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.LEFT);
 		combo_text.scrollFactor.set();
 		add(combo_text);
 	}
@@ -100,10 +100,9 @@ class UI extends FlxGroup
 		{
 			PlayState.i.game_over();
 		}
-		//if (health < 0) PlayState.i.openSubState(new GameOver());
 		
 		if (combo_amt > 75 || PlayState.i.squid.over_boost) bar_flash = true;
-		else bar_flash = false;
+		else if (combo_amt < 50) bar_flash = false;
 		
 		if (bar_flash && !last_flash) Sounds.play("combo_available", 0.25);
 		

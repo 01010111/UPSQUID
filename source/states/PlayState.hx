@@ -66,6 +66,7 @@ class PlayState extends ZState
 	public var ui:UI;
 	public var linked:Bool = true;
 	public var top_combo:Int = 0;
+	public var large_alphabet:String = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+x:.,!?/*";
 	
 	public static var i:PlayState;
 	
@@ -176,11 +177,11 @@ class PlayState extends ZState
 	{
 		walls = new FlxTypedGroup();
 		
-		var _l_wall = new FlxObject(1, 0, 32, 32);
+		var _l_wall = new FlxObject(2, 0, 32, 32);
 		_l_wall.immovable = true;
 		walls.add(_l_wall);
 		
-		var _r_wall = new FlxObject(FlxG.width - 33, 0, 32, 32);
+		var _r_wall = new FlxObject(FlxG.width - 34, 0, 32, 32);
 		_r_wall.immovable = true;
 		walls.add(_r_wall);
 		
@@ -203,7 +204,7 @@ class PlayState extends ZState
 	
 	function add_text(_y:Float, _text:String, _tween_time:Float, _scale:Float = 1, _scroll_factor:Float = 1):Void
 	{
-		var _t = new ZBitmapText(0, _y, " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?/:x+", FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
+		var _t = new ZBitmapText(0, _y, large_alphabet, FlxPoint.get(7, 9), "assets/images/large_font.png", FlxTextAlign.CENTER);
 		_t.text = _text;
 		_t.alpha = 0;
 		_t.scale.set(_scale, _scale);
@@ -301,18 +302,28 @@ class PlayState extends ZState
 				}
 			}
 			
+			var _d_star = "";
+			var _c_star = "";
 			var _d = Std.int( -(dolly.y - FlxG.height + 48) * (10 / FlxG.height));
-			if (_d > Reg.hi_depth) Reg.hi_depth = _d;
-			if (top_combo > Reg.hi_combo) Reg.hi_combo = top_combo;
+			if (_d > Reg.hi_depth) 
+			{
+				_d_star = "*";
+				Reg.hi_depth = _d;
+			}
+			if (top_combo > Reg.hi_combo) 
+			{
+				_c_star = "*";
+				Reg.hi_combo = top_combo;
+			}
 			
 			Reg.save();
 			
 			new FlxTimer().start(0.8).onComplete = function(t:FlxTimer):Void
 			{
-				add_text(FlxG.height, "GAME OVER", 						1, 		2, 0);
-				add_text(FlxG.height, "HIGH POINT:" + _d, 				1.5, 	1, 0);
-				add_text(FlxG.height, "HIGHEST COMBO:" + top_combo, 	2, 		1, 0);
-				add_text(FlxG.height, "PRESS LEFT + RIGHT TO RESTART",	2.75, 	1, 0);
+				add_text(FlxG.height * 0.4,		"GAME OVER", 										1, 		2, 0);
+				add_text(FlxG.height * 0.45,	_d_star + "HIGH POINT:" + _d + _d_star,				1.5, 	1, 0);
+				add_text(FlxG.height * 0.47,	_c_star + "HIGHEST COMBO:" + top_combo + _c_star,	2, 		1, 0);
+				add_text(FlxG.height * 0.6,		"PRESS LEFT + RIGHT TO RESTART",					2.75, 	1, 0);
 				new FlxTimer().start(1).onComplete = function(t:FlxTimer):Void { press_to_continue = true; }
 			}
 		}
