@@ -1,5 +1,6 @@
 package util;
 
+import flixel.FlxObject;
 import flixel.group.FlxGroup;
 import flixel.ui.FlxBar;
 import zerolib.util.ZBitmapText;
@@ -25,8 +26,13 @@ class UI extends FlxGroup
 	var combo_bar:FlxBar;
 	var combo_text:ZBitmapText;
 	var combo:Int;
+	var flash_timer:Int = 3;
+	var last_flash:Bool = false;
+	var combo_flash_timer:Int = 3;
+	
 	public var combo_amt:Float = 0;
 	public var bar_flash:Bool;
+	public var combo_flash:Bool;
 	
 	public function new()
 	{
@@ -84,10 +90,6 @@ class UI extends FlxGroup
 		}
 	}
 	
-	var flash_white:Bool = false;
-	var flash_timer:Int = 3;
-	var last_flash:Bool = false;
-	
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
@@ -96,7 +98,7 @@ class UI extends FlxGroup
 			if (i > health) pellets[i].whatever = false;
 			else pellets[i].whatever = true;
 		}
-		if (health < 0 && PlayState.i.linked && PlayState.i.squid.velocity.y >= 100) 
+		if (health < 0 && PlayState.i.linked && (PlayState.i.squid.getScreenPosition().y > FlxG.height * 0.9 || PlayState.i.squid.just_touched_floor)) 
 		{
 			PlayState.i.game_over();
 		}
@@ -104,7 +106,7 @@ class UI extends FlxGroup
 		if (combo_amt > 75 || PlayState.i.squid.over_boost) bar_flash = true;
 		else if (combo_amt < 50) bar_flash = false;
 		
-		if (bar_flash && !last_flash) Sounds.play("combo_available", 0.25);
+		if (bar_flash && !last_flash) Sounds.play("combo_available", 0.5);
 		
 		last_flash = bar_flash;
 		
@@ -118,16 +120,8 @@ class UI extends FlxGroup
 		{
 			if (flash_timer == 0)
 			{
-				if (flash_white)
-				{
-					flash_white = false;
-					combo_bar.color = 0xffffffff;
-				}
-				else 
-				{
-					flash_white = true;
-					combo_bar.color = 0xff808080;
-				}
+				
+				combo_bar.color = combo_bar.color == 0xffffffff ? 0xff808080 : 0xffffffff;
 				flash_timer = 3;
 			}
 			else 
@@ -138,6 +132,33 @@ class UI extends FlxGroup
 		else 
 		{
 			combo_bar.color = 0xff808080;
+		}
+		#if !flash
+		if (combo >= 10) 
+		{
+			combo_text.alignment = FlxTextAlign.CENTER;
+			combo_text.setPosition(PlayState.i.squid.getScreenPosition().x + PlayState.i.squid.width * 0.5 - 2, PlayState.i.squid.getScreenPosition().y + 28);
+		}
+		else
+		{
+			combo_text.alignment = FlxTextAlign.LEFT;
+			combo_text.setPosition(44, 16);
+		}
+		combo_text.fieldWidth = 0;
+		#end
+		
+		if (combo > Reg.hi_combo && combo >= PlayState.i.top_combo)
+		{
+			if (combo_flash_timer <= 0)
+			{
+				combo_text.color = combo_text.color == 0xffffffff ? 0xff808080 : 0xffffffff;
+				combo_flash_timer = 3;
+			}
+			else combo_flash_timer--;
+		}
+		else 
+		{
+			combo_text.color = 0xffffffff;
 		}
 	}
 	

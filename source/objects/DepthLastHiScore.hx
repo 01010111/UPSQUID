@@ -38,11 +38,6 @@ class DepthLastHiScore extends FlxGroup
 			lines.add(new LineBreaker());
 		}
 		
-		// Std.int( -(dolly.y - FlxG.height + 48) * (10 / FlxG.height));
-		// x = -(y - f + 48) * (10 / f)
-		// y = -(fx/10) + f - 48
-		var _y = -((FlxG.height * Reg.hi_depth) / 10) + FlxG.height;
-		
 		var _bm:BitmapData = new BitmapData(FlxG.width, 1, true, 0x00ffffff);
 		for (i in 0...Std.int(FlxG.width / 16))
 		{
@@ -53,14 +48,27 @@ class DepthLastHiScore extends FlxGroup
 		}
 		
 		line = new FlxBackdrop(_bm, 1, 1, true, false);
-		line.y = _y;
 		line.velocity.x = 15;
 		add(line);
 		
-		text = new ZBitmapText(0, _y - 4, " 0123456789m", FlxPoint.get(7, 7), "assets/images/depth_font.png", FlxTextAlign.CENTER, FlxG.width);
+		text = new ZBitmapText(0, 0, " 0123456789m", FlxPoint.get(7, 7), "assets/images/depth_font.png", FlxTextAlign.CENTER, FlxG.width);
 		text.text = "" + Reg.hi_depth + "m";
 		text.scrollFactor.set(1, 1);
 		add(text);
+		
+		set_position();
+	}
+	
+	public function set_position():Void
+	{
+		var _adj = 1.0;
+		if (Reg.diff == "EASY") _adj = 2;
+		if (Reg.diff == "TOUGH") _adj = 0.5;
+		
+		var _y = -((FlxG.height * (Reg.hi_depth * _adj)) / 10) + FlxG.height;
+		
+		line.y = _y;
+		text.y = _y - 4;
 	}
 	
 	override public function update(elapsed:Float):Void 
@@ -71,8 +79,6 @@ class DepthLastHiScore extends FlxGroup
 			PlayState.i.confetti.fire(PlayState.i.squid.getMidpoint());
 			PlayState.i.ui.combo_amt = ZMath.clamp(PlayState.i.ui.combo_amt + 20, 0, 100);
 			PlayState.i.explosions.fire(PlayState.i.squid.getMidpoint());
-			//FlxTween.tween(line, { alpha:0 }, 0.5);
-			//FlxTween.tween(text, { alpha:0 }, 0.5).onComplete = function(t:FlxTween):Void { kill(); }
 			kill();
 		}
 		super.update(elapsed);

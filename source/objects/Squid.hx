@@ -18,12 +18,17 @@ class Squid extends FlxSprite
 {
 	
 	public var over_boost:Bool = false;
-	var ghost:FlxTrail;
-	var begun:Bool = false;
+	public var begun:Bool = false;
 	public var kickin:Bool = true;
+	public var just_touched_floor:Bool = false;
 	
-	public function new()
+	var ghost:FlxTrail;
+	var can_control:Bool = true;
+	
+	public function new(_demo:Bool = false)
 	{
+		if (_demo) can_control = false;
+		
 		super();
 		loadGraphic("assets/images/sleng_teng.png", true, 32, 32);
 		animation.add("idle",   [12]);
@@ -37,7 +42,7 @@ class Squid extends FlxSprite
 		setSize(16, 16);
 		offset.set(8, 8);
 		screenCenter();
-		y += Reg.cam_offs;
+		if (!_demo) y += Reg.cam_offs;
 		
 		angle = -90;
 		drag.x = 100;
@@ -45,15 +50,16 @@ class Squid extends FlxSprite
 		elasticity = 0.3;
 		
 		ghost = new FlxTrail(this);
-		PlayState.i.fx_bg_far.add(ghost);
+		if (!_demo) PlayState.i.fx_bg_far.add(ghost);
 		
 		FlxG.watch.add(animation.curAnim, "frameRate", "R: ");
 	}
 	
 	override public function update(elapsed:Float):Void 
 	{
+		just_touched_floor = false;
 		check_collisions();
-		if (kickin) controls();
+		if (kickin && can_control) controls();
 		else 
 		{
 			velocity.set();
@@ -86,10 +92,10 @@ class Squid extends FlxSprite
 			else 
 			{
 				var thrusty = true;
-				if (PlayState.i.c._l) angle -= 3;
-				if (PlayState.i.c._r) angle += 3;
+				if (PlayState.i.c._l) angle -= (2 + Reg.turn_speed);
+				if (PlayState.i.c._r) angle += (2 + Reg.turn_speed);
 				if (PlayState.i.c._l || PlayState.i.c._r || velocity.y > 0) thrusty = false;
-				if (PlayState.i.c._l_released || PlayState.i.c._r_released) thrust();
+				if (PlayState.i.c._l_just_released || PlayState.i.c._r_just_released) thrust();
 				if (PlayState.i.c._l && PlayState.i.c._r && PlayState.i.ui.bar_flash) go_over_boost();
 				angle = ZMath.clamp(angle, -170, -10);
 			}
@@ -126,7 +132,7 @@ class Squid extends FlxSprite
 	function over_boost_fx():Void
 	{
 		PlayState.i.confetti.fire(getMidpoint());
-		FlxG.camera.shake(0.01, 0.1);
+		PlayState.i.screen_shake();
 		//PlayState.i.fx_fg.add(new Explosion(getMidpoint()));
 	}
 	
@@ -137,13 +143,14 @@ class Squid extends FlxSprite
 		if (justTouched(FlxObject.CEILING))
 		{
 			velocity.y = 100;
-			Sounds.play("ouch", 0.15);
+			Sounds.play("ouch", 0.3);
 		}
 		
 		if (justTouched(FlxObject.FLOOR))
 		{
 			velocity.y = -100;
-			Sounds.play("bounce", 0.25);
+			Sounds.play("bounce", 0.5);
+			just_touched_floor = true;
 		}
 	}
 	
@@ -161,7 +168,7 @@ class Squid extends FlxSprite
 	{
 		if (PlayState.i.ui.health >= 0)
 		{
-			Sounds.play("bloop" + ZMath.randomRangeInt(1, 5), ZMath.randomRange(0.1, 0.2));
+			Sounds.play("bloop" + ZMath.randomRangeInt(1, 5), ZMath.randomRange(0.2, 0.4));
 			var v = ZMath.velocityFromAngle(angle, 300);
 			velocity.set(v.x, v.y);
 			PlayState.i.ui.take(1);
@@ -170,6 +177,12 @@ class Squid extends FlxSprite
 				new FlxTimer().start(i * 0.05).onComplete = function(t:FlxTimer):Void { PlayState.i.bubbles.fire(getMidpoint(), ZMath.velocityFromAngle(angle + ZMath.randomRange(120, 240), ZMath.randomRange(20, 50))); }
 			}
 		}
+	}
+	
+	override public function kill():Void 
+	{
+		ghost.kill();
+		super.kill();
 	}
 	
 }

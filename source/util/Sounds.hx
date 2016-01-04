@@ -9,9 +9,9 @@ import flixel.FlxG;
 class Sounds
 {
 	
-	public static function play(_s:String, _v:Float = 0.5):Void
+	public static function play(_s:String, _v:Float = 1):Void
 	{
-		FlxG.sound.play("Snd_" + _s, _v * 1.2);
+		FlxG.sound.play("Snd_" + _s, _v * Reg.snd_vol);
 	}
 	
 }

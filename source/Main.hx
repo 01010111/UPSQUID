@@ -9,6 +9,7 @@ import flixel.FlxGame;
 import flixel.FlxState;
 import openfl.display.FPS;
 import states.*;
+import util.Reg;
 
 class Main extends Sprite 
 {
@@ -30,6 +31,10 @@ class Main extends Sprite
 	public function new() 
 	{
 		super();
+		
+		#if !flash
+		Reg.newgrounds_build = false;
+		#end
 		
 		if (stage != null) 
 		{

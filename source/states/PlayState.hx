@@ -14,6 +14,7 @@ import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
@@ -34,20 +35,11 @@ import util.*;
 
 class PlayState extends ZState
 {
-	var alt_colors:Array<Int> = [
-		0xffff0000/*,
-		0xffd93963,
-		0xff7c0fd8,
-		0xff22b764,
-		0xffee5564,
-		0xff*/
-	];
-	
 	var level:FlxGroup;
 	var stages:Array<FlxTilemap>;
 	var stage_amt:Int = 3;
 	var blocks:FlxGroup;
-	var enemies:FlxTypedGroup<Enemy>;
+	var plankton:Plankton;
 	var depth:Int;
 	var dolly:FlxObject;
 	var levels:LevelUtil;
@@ -56,6 +48,7 @@ class PlayState extends ZState
 	var press_to_continue:Bool = false;
 	
 	public var squid:Squid;
+	public var enemies:FlxTypedGroup<Enemy>;
 	public var bubbles:Bubbles;
 	public var blood:Blood;
 	public var confetti:Confetti;
@@ -66,6 +59,7 @@ class PlayState extends ZState
 	public var ui:UI;
 	public var linked:Bool = true;
 	public var top_combo:Int = 0;
+	public var last_depth_indicator:DepthLastHiScore;
 	public var large_alphabet:String = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+x:.,!?/*";
 	
 	public static var i:PlayState;
@@ -74,14 +68,15 @@ class PlayState extends ZState
 	{
 		#if !flash
 		FlxG.fullscreen = true;
+		#else
+		flash(0, 1);
 		#end
 		
-		Reg.initSave();
 		i = this;
-		colors = [0xff000000, alt_colors[ZMath.randomRangeInt(0, alt_colors.length - 1)], 0xffffffff];
+		Reg.init();
 		
 		//MUSIC! play intro
-		FlxG.sound.playMusic("Snd_bgm1", 0.5);
+		FlxG.sound.playMusic("Snd_bgm1", Reg.mus_vol * 0.5);
 		FlxG.sound.music.pause();
 		
 		level = new FlxGroup();
@@ -90,6 +85,7 @@ class PlayState extends ZState
 		fx_bg = new FlxGroup();
 		fx_fg = new FlxGroup();
 		enemies = new FlxTypedGroup();
+		plankton = new Plankton();
 		bubbles = new Bubbles();
 		blood = new Blood();
 		confetti = new Confetti();
@@ -123,9 +119,11 @@ class PlayState extends ZState
 			_blinds.add(_b);
 		}
 		
+		last_depth_indicator = new DepthLastHiScore();
+		
 		add(fx_bg_far);
 		add(_blinds);
-		if (Reg.hi_depth > 0) add(new DepthLastHiScore());
+		if (Reg.hi_depth > 0) add(last_depth_indicator);
 		add(fx_bg);
 		add(bubbles);
 		add(level);
@@ -147,6 +145,25 @@ class PlayState extends ZState
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height * 3);
 		FlxG.worldBounds.setPosition(0, stages[stages.length - 1].y);
 		super.create();
+		
+		change_colors(Reg.cur_color);
+		
+		if (!Reg.played_b4)
+		{
+			var _tut_prompt = new Prompt("EVER PLAYED\nUPSQUID BEFORE?", "PRESS LEFT OR RIGHT TO CHOOSE");
+			_tut_prompt.yes_callback = function():Void
+			{
+				Reg.played_b4 = true;
+				_tut_prompt.close();
+			}
+			_tut_prompt.no_callback = function():Void
+			{
+				Reg.played_b4 = true;
+				_tut_prompt.close();
+				openSubState(new Tutorial());
+			}
+			openSubState(_tut_prompt);
+		}
 	}
 	
 	function load_map(_t:FlxTilemap):Void
@@ -163,13 +180,13 @@ class PlayState extends ZState
 	
 	function load_objects(_entityName:String, _entityData:Xml):Void
 	{
-		var p:FlxPoint = FlxPoint.get(Std.parseInt(_entityData.get("x")), Std.parseInt(_entityData.get("y")) + loaded_object_y_offset);
+		var _p:FlxPoint = FlxPoint.get(Std.parseInt(_entityData.get("x")), Std.parseInt(_entityData.get("y")) + loaded_object_y_offset);
 		switch(_entityName)
 		{
 			case "block":
-				blocks.add(new Block(p));
+				blocks.add(new Block(_p));
 			case "babby":
-				enemies.add(new Plankton(p));
+				plankton.spawn(_p);
 		}
 	}
 	
@@ -197,7 +214,7 @@ class PlayState extends ZState
 		
 		var _o = Reg.cam_offs > 32 ? 0.4 : 0.6;
 		
-		add_text(FlxG.height * 0.75, "PRESS LEFT + RIGHT TO PLAY", 1);
+		add_text(FlxG.height * 0.75, "PRESS LEFT + RIGHT TO PLAY\nPRESS UP FOR MENU", 1);
 		if (Reg.hi_combo > 0) add_text(FlxG.height * _o, "HI COMBO : " + Reg.hi_combo, 2);
 		if (Reg.hi_combo > 0) add_text(FlxG.height * (_o + 0.025), "HI POINT : " + Reg.hi_depth, 2);
 	}
@@ -222,6 +239,7 @@ class PlayState extends ZState
 		if (dolly.y < stages[1].y) swap_tilemaps();
 		if (squid.getScreenPosition().y > FlxG.height && linked) game_over();
 		if (press_to_continue && c._l && c._r) FlxG.resetState();
+		if (c._u_just_pressed) openSubState(new Menu());
 	}
 	
 	function move_dolly():Void
@@ -254,18 +272,23 @@ class PlayState extends ZState
 		explosions.fire(_b.getMidpoint());
 		for (i in 0...12) bubbles.fire(_b.getMidpoint(), ZMath.velocityFromAngle(ZMath.randomRange(0, 360), ZMath.randomRange(20, 40)));
 		_b.kill();
-		FlxG.camera.shake(0.01, 0.1);
+		screen_shake();
 	}
 	
 	function chomp(_s:Squid, _e:Enemy):Void
 	{
 		blood.fire(_e.getMidpoint());
 		explosions.fire(_e.getMidpoint());
-		_e.destroy();
-		ui.give(4);
+		_e.kill();
+		switch(Reg.diff)
+		{
+			case "EASY" : ui.give(8);
+			case "NORMAL" : ui.give(4);
+			case "TOUGH" : ui.give(2);
+		}
 		ui.combo_plus();
-		FlxG.camera.shake(0.005, 0.1);
-		Sounds.play("chomp", 0.3);
+		screen_shake(0.5);
+		Sounds.play("chomp", 0.6);
 	}
 	
 	function swap_tilemaps():Void
@@ -278,8 +301,8 @@ class PlayState extends ZState
 	
 	public function game_over():Void
 	{
-		Sounds.play("drown", 0.6);
-		Sounds.play("explosion", 0.25);
+		Sounds.play("drown");
+		Sounds.play("explosion", 0.5);
 		//MUSIC! stop
 		FlxG.sound.music.stop();
 		
@@ -305,6 +328,8 @@ class PlayState extends ZState
 			var _d_star = "";
 			var _c_star = "";
 			var _d = Std.int( -(dolly.y - FlxG.height + 48) * (10 / FlxG.height));
+			if (Reg.diff == "EASY") _d = Std.int(_d * 0.5);
+			if (Reg.diff == "TOUGH") _d = Std.int(_d * 2);
 			if (_d > Reg.hi_depth) 
 			{
 				_d_star = "*";
@@ -328,6 +353,28 @@ class PlayState extends ZState
 			}
 		}
 		
+	}
+	
+	public function change_colors(_colors:Int):Void
+	{
+		Reg.cur_color = _colors;
+		#if web
+		colors = Reg.alt_colors[_colors];
+		initColorPalette();
+		#else
+		Reg.shader_update();
+		#end
+	}
+	
+	public function screen_shake(_amount:Float = 1):Void
+	{
+		var _amt = _amount;
+		if (Reg.shake == "NONE") _amt *= 0;
+		if (Reg.shake == "VLAMBEER") _amt *= 3;
+		
+		var _time = Reg.shake == "VLAMBEER" ? 0.25 : 0.1;
+		
+		FlxG.camera.shake(_amt * 0.01, _time);
 	}
 	
 }
