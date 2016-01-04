@@ -8,13 +8,15 @@ import flash.Lib;
 import flixel.FlxGame;
 import flixel.FlxState;
 import openfl.display.FPS;
+import states.*;
+import util.Reg;
 
 class Main extends Sprite 
 {
 	var gameWidth:Int = 288; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 512; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	var initialState:Class<FlxState> = SlengTeng; // The FlxState the game starts with.
-	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
+	var initialState:Class<FlxState> = PlayState; // The FlxState the game starts with.
+	var zoom:Float = 1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
@@ -29,6 +31,10 @@ class Main extends Sprite
 	public function new() 
 	{
 		super();
+		
+		#if !flash
+		Reg.newgrounds_build = false;
+		#end
 		
 		if (stage != null) 
 		{
