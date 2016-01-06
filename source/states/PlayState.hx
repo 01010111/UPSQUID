@@ -148,7 +148,7 @@ class PlayState extends ZState
 		
 		change_colors(Reg.cur_color);
 		
-		if (!Reg.played_b4)
+		/*if (!Reg.played_b4)
 		{
 			var _tut_prompt = new Prompt("EVER PLAYED\nUPSQUID BEFORE?", "PRESS LEFT OR RIGHT TO CHOOSE");
 			_tut_prompt.yes_callback = function():Void
@@ -163,7 +163,7 @@ class PlayState extends ZState
 				openSubState(new Tutorial());
 			}
 			openSubState(_tut_prompt);
-		}
+		}*/
 	}
 	
 	function load_map(_t:FlxTilemap):Void

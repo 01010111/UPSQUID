@@ -2,7 +2,7 @@
 <project>
 	<!------------------------------APPLICATION SETTINGS---------------------------->
 	
-	<app title="UPSQUID" file="UPSQUID" main="Main" version="0.0.1" company="01010111" package="com.zeroone.upsquid" />
+	<app title="UPSQUID" file="UPSQUID" main="Main" version="0.1.0" company="01010111" package="com.zeroone.upsquid" />
 	
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 	<!--or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"!-->
@@ -123,12 +123,12 @@
 	<!--------------------------------CUSTOM---------------------------------------->
 	
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
-	<icon path="assets/images/icon.svg"/>
-	<icon path="assets/images/icon_16.png"  size="16" />
-	<icon path="assets/images/icon_32.png"  size="32" />
-	<icon path="assets/images/icon_64.png"  size="64" />
-	<icon path="assets/images/icon_128.png" size="128" />
-	<icon path="assets/images/icon_256.png" size="256" />
-	<icon path="assets/images/icon_512.png" size="512" />
+	<icon path="assets/images/icon.svg" embed="true" />
+	<icon path="assets/images/icon_16.png"  size="16" embed="true" />
+	<icon path="assets/images/icon_32.png"  size="32" embed="true" />
+	<icon path="assets/images/icon_64.png"  size="64" embed="true" />
+	<icon path="assets/images/icon_128.png" size="128" embed="true" />
+	<icon path="assets/images/icon_256.png" size="256" embed="true" />
+	<icon path="assets/images/icon_512.png" size="512" embed="true" />
 	
 </project>
