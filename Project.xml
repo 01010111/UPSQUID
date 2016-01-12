@@ -7,7 +7,7 @@
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 	<!--or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"!-->
 	<!--app preloader="flixel.system.FlxPreloader" /-->
-	<app preloader="util.Preloader" />
+	<app preloader="util.Preloader" if="flash" />
 	
 	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2 -->
 	<set name="SWF_VERSION" value="11.8" />
@@ -55,6 +55,7 @@
 		<!--sound path=".mp3" id="Snd_" /-->
 	</assets>
 	<assets path="assets/audio/ogg" unless="flash" embed="true">
+		<sound path="bgm1.ogg" id="Snd_bgm1" />
 		<sound path="bloop1.ogg" id="Snd_bloop1" />
 		<sound path="bloop2.ogg" id="Snd_bloop2" />
 		<sound path="bloop3.ogg" id="Snd_bloop3" />
@@ -62,14 +63,13 @@
 		<sound path="bloop5.ogg" id="Snd_bloop5" />
 		<sound path="boost_in.ogg" id="Snd_boost_in" />
 		<sound path="boost_out.ogg" id="Snd_boost_out" />
+		<sound path="bounce.ogg" id="Snd_bounce" />
+		<sound path="bubble.ogg" id="Snd_bubble" />
 		<sound path="chomp.ogg" id="Snd_chomp" />
+		<sound path="combo_available.ogg" id="Snd_combo_available" />
 		<sound path="drown.ogg" id="Snd_drown" />
 		<sound path="explosion.ogg" id="Snd_explosion" />
 		<sound path="ouch.ogg" id="Snd_ouch" />
-		<sound path="bounce.ogg" id="Snd_bounce" />
-		<sound path="bubble.ogg" id="Snd_bubble" />
-		<sound path="combo_available.ogg" id="Snd_combo_available" />
-		<sound path="bgm1.ogg" id="Snd_bgm1" />
 		<!--sound path=".ogg" id="Snd_" /-->
 	</assets>
 	
@@ -123,12 +123,12 @@
 	<!--------------------------------CUSTOM---------------------------------------->
 	
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
-	<icon path="assets/images/icon.svg" embed="true" />
-	<icon path="assets/images/icon_16.png"  size="16" embed="true" />
-	<icon path="assets/images/icon_32.png"  size="32" embed="true" />
-	<icon path="assets/images/icon_64.png"  size="64" embed="true" />
-	<icon path="assets/images/icon_128.png" size="128" embed="true" />
-	<icon path="assets/images/icon_256.png" size="256" embed="true" />
-	<icon path="assets/images/icon_512.png" size="512" embed="true" />
+	<icon path="assets/images/icon.svg" />
+	<icon path="assets/images/icon_16.png"  size="16" />
+	<icon path="assets/images/icon_32.png"  size="32" />
+	<icon path="assets/images/icon_64.png"  size="64" />
+	<icon path="assets/images/icon_128.png" size="128" />
+	<icon path="assets/images/icon_256.png" size="256" />
+	<icon path="assets/images/icon_512.png" size="512" />
 	
 </project>

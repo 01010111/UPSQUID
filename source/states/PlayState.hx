@@ -20,7 +20,6 @@ import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
-import openfl.Lib;
 import zerolib.util.ZBitmapText;
 import zerolib.util.ZMath;
 import flixel.util.FlxAxes;
@@ -67,7 +66,7 @@ class PlayState extends ZState
 	override public function create():Void 
 	{
 		#if !flash
-		FlxG.fullscreen = true;
+		//FlxG.fullscreen = true;
 		#else
 		flash(0, 1);
 		#end

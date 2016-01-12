@@ -7,7 +7,8 @@ import zerolib.util.ZMath;
 import flixel.math.FlxMath;
 import flixel.FlxSprite;
 import flixel.util.FlxTimer;
-import util.*;
+import util.Sounds;
+import util.Reg;
 import states.PlayState;
 
 /**
